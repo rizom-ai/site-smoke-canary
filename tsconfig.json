@@ -1,0 +1,17 @@
+{
+  "compilerOptions": {
+    "allowImportingTsExtensions": true,
+    "esModuleInterop": true,
+    "jsx": "react-jsx",
+    "jsxImportSource": "preact",
+    "module": "Preserve",
+    "moduleResolution": "bundler",
+    "noEmit": true,
+    "resolveJsonModule": true,
+    "strict": true,
+    "target": "ES2022",
+    "types": ["bun-types"]
+  },
+  "include": ["src/**/*", "test/**/*"],
+  "exclude": ["node_modules"]
+}
