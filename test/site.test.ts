@@ -6,6 +6,17 @@ import { renderToString } from "preact-render-to-string";
 import site, { CanaryHomeLayout, canaryMarker, canaryStatus } from "../src";
 
 describe("smoke canary site package", () => {
+  it("publishes the standard external compatibility contract", async () => {
+    const manifest = (await Bun.file(
+      join(import.meta.dir, "..", "package.json"),
+    ).json()) as Record<string, unknown>;
+    const peers = manifest["peerDependencies"] as Record<string, unknown>;
+    expect(peers["@rizom/brain"]).toBe(">=0.2.0-alpha.217 <0.3.0");
+    expect(manifest["publishPeerDependencies"]).toBeUndefined();
+    expect(manifest["publishExports"]).toBeUndefined();
+    expect(JSON.stringify(manifest)).not.toContain("workspace:");
+  });
+
   it("exports a minimal, content-independent SitePackage", () => {
     expect(site.layouts["default"]).toBeFunction();
     expect(site.plugin).toBeFunction();
