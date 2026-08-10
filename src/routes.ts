@@ -1,4 +1,4 @@
-import type { RouteDefinitionInput } from "@rizom/brain/site";
+import type { RouteDefinitionInput } from "@rizom/site";
 
 /**
  * Single self-contained route. The section renders our static `home` template
@@ -17,8 +17,7 @@ export const routes: RouteDefinitionInput[] = [
     sections: [
       {
         id: "home",
-        template: "smoke-canary-site:home",
-        content: {},
+        template: "smoke-canary-site.home",
       },
     ],
   },

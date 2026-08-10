@@ -6,23 +6,30 @@ import { renderToString } from "preact-render-to-string";
 import site, { CanaryHomeLayout, canaryMarker, canaryStatus } from "../src";
 
 describe("smoke canary site package", () => {
-  it("publishes the standard external compatibility contract", async () => {
+  it("publishes the stable external authoring contract", async () => {
     const manifest = (await Bun.file(
       join(import.meta.dir, "..", "package.json"),
     ).json()) as Record<string, unknown>;
     const peers = manifest["peerDependencies"] as Record<string, unknown>;
-    expect(peers["@rizom/brain"]).toBe(">=0.2.0-alpha.217 <0.3.0");
+    const dependencies = manifest["dependencies"] as Record<string, unknown>;
+    expect(peers["@rizom/brain"]).toBe(">=0.2.0-alpha.272 <0.3.0");
+    expect(dependencies["@rizom/site"]).toBe("0.2.0-alpha.233");
     expect(manifest["publishPeerDependencies"]).toBeUndefined();
     expect(manifest["publishExports"]).toBeUndefined();
     expect(JSON.stringify(manifest)).not.toContain("workspace:");
+
+    const source = await Bun.file(
+      join(import.meta.dir, "..", "src", "index.ts"),
+    ).text();
+    expect(source).toContain('from "@rizom/site"');
+    expect(source).not.toContain("@rizom/brain/site");
+    expect(source).not.toContain("ServicePlugin");
   });
 
-  it("exports a minimal, content-independent SitePackage", () => {
+  it("exports a minimal, content-independent site definition", () => {
     expect(site.layouts["default"]).toBeFunction();
-    expect(site.plugin).toBeFunction();
-    expect(
-      (site.plugin() as unknown as { register?: unknown }).register,
-    ).toBeFunction();
+    expect(site.sections).toBeArray();
+    expect(site).not.toHaveProperty("plugin");
     // The canary owns no entity types — it must not depend on blog/decks/profile.
     expect(site.entityDisplay).toEqual({});
   });
@@ -32,9 +39,10 @@ describe("smoke canary site package", () => {
     const home = site.routes[0];
     expect(home?.path).toBe("/");
     const section = home?.sections?.[0];
-    // Renders our own static template with inline content — no datasource query.
+    // The public authoring API normalizes the template and supplies validated
+    // static package metadata without querying brain content.
     expect(section?.template).toBe("smoke-canary-site:home");
-    expect(section?.content).toEqual({});
+    expect(section?.content).toEqual(canaryStatus);
   });
 
   it("ships a deterministic public canary marker", () => {
@@ -55,7 +63,7 @@ describe("smoke canary site package", () => {
   });
 
   it("renders deterministic homepage content (not an empty page)", () => {
-    const html = renderToString(CanaryHomeLayout({}));
+    const html = renderToString(CanaryHomeLayout(canaryStatus));
     expect(html).toContain("@rizom/site-smoke-canary");
     expect(html).toContain(canaryStatus.version);
     expect(html.length).toBeGreaterThan(200);
