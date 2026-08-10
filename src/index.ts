@@ -1,13 +1,13 @@
-import type { SitePackage } from "@rizom/brain/site";
-import { SmokeCanarySitePlugin, smokeCanarySitePlugin } from "./plugin";
+import { defineSection, defineSite, sectionGroup, z } from "@rizom/site";
 import { CanaryLayout } from "./layouts/CanaryLayout";
-import { CanaryHomeLayout, type CanaryHomeData } from "./templates/canary-home";
+import {
+  CanaryHomeLayout,
+  type CanaryHomeData,
+} from "./templates/canary-home";
 import { routes } from "./routes";
 import { canaryMarker, canaryStatus, type CanaryStatus } from "./canary";
 
 export {
-  SmokeCanarySitePlugin,
-  smokeCanarySitePlugin,
   CanaryLayout,
   CanaryHomeLayout,
   type CanaryHomeData,
@@ -17,21 +17,44 @@ export {
   type CanaryStatus,
 };
 
+const home = defineSection(
+  z.object({
+    package: z.string(),
+    purpose: z.string(),
+    surface: z.string(),
+    version: z.string(),
+  }),
+  CanaryHomeLayout,
+  {
+    title: "Smoke canary home",
+    description: "Deterministic hosted-package compatibility marker.",
+    requiredPermission: "public",
+  },
+);
+
 /**
  * Minimal, content-independent canary site. Owns no entity types and depends
- * on no brain content — its single route renders a static template that proves
- * the externally-hosted site+theme package loads, builds, deploys, and styles.
+ * on no brain content — its single route renders static package metadata that
+ * proves the externally hosted site and theme loaded, built, and deployed.
  */
-const site: SitePackage = {
+export default defineSite({
   layouts: {
     default: CanaryLayout,
   },
   routes,
-  plugin: (config) => smokeCanarySitePlugin(config as Record<string, never>),
+  sections: [sectionGroup("smoke-canary-site", { home })],
+  content: {
+    "smoke-canary-site": {
+      home: {
+        package: canaryStatus.package,
+        purpose: canaryStatus.purpose,
+        surface: canaryStatus.surface,
+        version: canaryStatus.version,
+      },
+    },
+  },
   entityDisplay: {},
   staticAssets: {
     "/.well-known/rover-site-canary.json": canaryMarker,
   },
-};
-
-export default site;
+});

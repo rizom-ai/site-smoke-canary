@@ -11,15 +11,11 @@ deployed, and rendered through the public hosting path.
 
 ## Public contract
 
-The source imports only documented `@rizom/brain` entry points:
-
-- `@rizom/brain`
-- `@rizom/brain/site`
-- `@rizom/brain/plugins`
-- `@rizom/brain/templates`
-
-Brain compatibility is hand-authored in `peerDependencies` as
-`>=0.2.0-alpha.217 <0.3.0`. There is no publish-time manifest transform.
+The source uses the stable declarative site-authoring API from
+`@rizom/site`; it does not import Brain internals or subclass runtime plugins.
+The authoring API is an exact dependency, while Brain compatibility is
+hand-authored in `peerDependencies` as `>=0.2.0-alpha.272 <0.3.0`. There is no
+publish-time manifest transform.
 
 ## Develop
 

@@ -1,16 +1,9 @@
 /** @jsxImportSource preact */
 import type { JSX } from "preact";
-import { canaryStatus } from "../canary";
+import type { CanaryStatus } from "../canary";
 
-/** Static homepage — no entity data, so the schema carries no fields. */
-export type CanaryHomeData = Record<string, never>;
-
-const rows: ReadonlyArray<[label: string, value: string]> = [
-  ["Package", canaryStatus.package],
-  ["Version", canaryStatus.version],
-  ["Surface", canaryStatus.surface],
-  ["Purpose", canaryStatus.purpose],
-];
+/** Static build metadata validated by the public site authoring contract. */
+export type CanaryHomeData = CanaryStatus;
 
 /**
  * Deterministic canary homepage. Renders fixed build metadata with theme
@@ -18,7 +11,16 @@ const rows: ReadonlyArray<[label: string, value: string]> = [
  * package loaded, built, deployed, and styled — with no dependency on brain
  * content (profile, posts, site-info).
  */
-export const CanaryHomeLayout = (_data: CanaryHomeData): JSX.Element => {
+export const CanaryHomeLayout = (
+  data: CanaryHomeData,
+): JSX.Element => {
+  const rows: ReadonlyArray<[label: string, value: string]> = [
+    ["Package", data.package],
+    ["Version", data.version],
+    ["Surface", data.surface],
+    ["Purpose", data.purpose],
+  ];
+
   return (
     <section className="mx-auto w-full max-w-2xl px-6 py-16 bg-theme">
       <p className="text-sm uppercase tracking-wide text-theme-muted mb-2">
@@ -29,7 +31,7 @@ export const CanaryHomeLayout = (_data: CanaryHomeData): JSX.Element => {
       </h1>
       <p className="text-lg text-theme-muted mb-10">
         This page is served entirely by the externally-hosted{" "}
-        <span className="text-theme">{canaryStatus.package}</span> package. If
+        <span className="text-theme">{data.package}</span> package. If
         you can read it, the package loaded, built, deployed, and rendered with
         its theme.
       </p>
