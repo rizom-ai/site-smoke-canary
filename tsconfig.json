@@ -3,7 +3,6 @@
     "allowImportingTsExtensions": true,
     "esModuleInterop": true,
     "jsx": "react-jsx",
-    "jsxImportSource": "preact",
     "module": "Preserve",
     "moduleResolution": "bundler",
     "noEmit": true,

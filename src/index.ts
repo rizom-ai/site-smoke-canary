@@ -1,9 +1,6 @@
 import { defineSection, defineSite, sectionGroup, z } from "@rizom/site";
 import { CanaryLayout } from "./layouts/CanaryLayout";
-import {
-  CanaryHomeLayout,
-  type CanaryHomeData,
-} from "./templates/canary-home";
+import { CanaryHomeLayout, type CanaryHomeData } from "./templates/canary-home";
 import { routes } from "./routes";
 import { canaryMarker, canaryStatus, type CanaryStatus } from "./canary";
 
