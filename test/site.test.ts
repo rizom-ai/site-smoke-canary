@@ -1,9 +1,14 @@
 import { describe, expect, it } from "bun:test";
-import { readdirSync, readFileSync } from "node:fs";
+import { createElement } from "react";
+import { renderToStaticMarkup } from "react-dom/server";
 import { join } from "node:path";
-import { renderToString } from "preact-render-to-string";
 
-import site, { CanaryHomeLayout, canaryMarker, canaryStatus } from "../src";
+import site, {
+  CanaryHomeLayout,
+  CanaryLayout,
+  canaryMarker,
+  canaryStatus,
+} from "../src";
 
 describe("smoke canary site package", () => {
   it("publishes the stable external authoring contract", async () => {
@@ -12,8 +17,11 @@ describe("smoke canary site package", () => {
     ).json()) as Record<string, unknown>;
     const peers = manifest["peerDependencies"] as Record<string, unknown>;
     const dependencies = manifest["dependencies"] as Record<string, unknown>;
-    expect(peers["@rizom/brain"]).toBe(">=0.2.0-alpha.272 <0.3.0");
-    expect(dependencies["@rizom/site"]).toBe("0.2.0-alpha.233");
+    expect(peers["@rizom/brain"]).toBe(">=0.2.0-alpha.333 <0.3.0");
+    expect(peers["react"]).toBe("^19.2.7");
+    expect(peers["react-dom"]).toBe("^19.2.7");
+    expect(dependencies["@rizom/site"]).toBe("0.2.0-alpha.235");
+    expect(JSON.stringify(manifest)).not.toContain("preact");
     expect(manifest["publishPeerDependencies"]).toBeUndefined();
     expect(manifest["publishExports"]).toBeUndefined();
     expect(JSON.stringify(manifest)).not.toContain("workspace:");
@@ -62,26 +70,30 @@ describe("smoke canary site package", () => {
     expect(canaryStatus.version).toMatch(/^\d+\.\d+\.\d+/);
   });
 
-  it("renders deterministic homepage content (not an empty page)", () => {
-    const html = renderToString(CanaryHomeLayout(canaryStatus));
+  it("renders the complete package through React DOM without foreign VNodes", () => {
+    const home = createElement(CanaryHomeLayout, {
+      ...canaryStatus,
+      key: "home",
+    });
+    const html = renderToStaticMarkup(
+      createElement(CanaryLayout, { sections: [home] }),
+    );
+
     expect(html).toContain("@rizom/site-smoke-canary");
     expect(html).toContain(canaryStatus.version);
+    expect(html).toContain("Package canary is live");
     expect(html.length).toBeGreaterThan(200);
   });
 
-  // The package ships raw `src/*.tsx`, transpiled live by the brain runtime,
-  // which defaults to the React JSX runtime. Each JSX file must self-declare the
-  // preact runtime via pragma or boot fails resolving `react/jsx-runtime`.
-  it("declares the preact JSX runtime pragma in every shipped .tsx", () => {
-    const srcDir = join(import.meta.dir, "..", "src");
-    const tsxFiles = readdirSync(srcDir, { recursive: true }).filter(
-      (entry): entry is string =>
-        typeof entry === "string" && entry.endsWith(".tsx"),
-    );
-    expect(tsxFiles.length).toBeGreaterThan(0);
-    for (const relativePath of tsxFiles) {
-      const source = readFileSync(join(srcDir, relativePath), "utf8");
-      expect(source.startsWith("/** @jsxImportSource preact */")).toBe(true);
+  it("contains no retired Preact runtime imports or JSX directives", async () => {
+    const sourceFiles = [
+      join(import.meta.dir, "..", "src", "layouts", "CanaryLayout.tsx"),
+      join(import.meta.dir, "..", "src", "templates", "canary-home.tsx"),
+    ];
+    for (const path of sourceFiles) {
+      const source = await Bun.file(path).text();
+      expect(source).not.toContain("preact");
+      expect(source).not.toContain("@jsxImportSource");
     }
   });
 });

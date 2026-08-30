@@ -1,9 +1,8 @@
-/** @jsxImportSource preact */
-import type { ComponentChildren, JSX } from "preact";
+import type { JSX, ReactNode } from "react";
 
 export interface CanaryLayoutProps {
   /** Rendered section output for the current route. */
-  sections: ComponentChildren[];
+  sections: ReactNode[];
 }
 
 /**
