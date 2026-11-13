@@ -17,7 +17,7 @@ export const routes: RouteDefinitionInput[] = [
     sections: [
       {
         id: "home",
-        template: "smoke-canary-site.home",
+        template: "smoke-canary-site:home",
       },
     ],
   },
