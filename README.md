@@ -14,7 +14,7 @@ deployed, and rendered through the public hosting path.
 The source uses the stable declarative site-authoring API from
 `@rizom/site`; it does not import Brain internals or subclass runtime plugins.
 The authoring API is an exact dependency, while Brain compatibility is
-hand-authored in `peerDependencies` as `>=0.2.0-alpha.333 <0.3.0`. React and
+hand-authored in `peerDependencies` as `>=0.2.0-alpha.711 <0.3.0`. React and
 React DOM are explicit peer dependencies, matching the Brain site renderer.
 There is no publish-time manifest transform.
 
