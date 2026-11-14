@@ -8,6 +8,7 @@ import site, {
   CanaryLayout,
   canaryMarker,
   canaryStatus,
+  routes,
 } from "../src";
 
 describe("smoke canary site package", () => {
@@ -17,10 +18,10 @@ describe("smoke canary site package", () => {
     ).json()) as Record<string, unknown>;
     const peers = manifest["peerDependencies"] as Record<string, unknown>;
     const dependencies = manifest["dependencies"] as Record<string, unknown>;
-    expect(peers["@rizom/brain"]).toBe(">=0.2.0-alpha.333 <0.3.0");
+    expect(peers["@rizom/brain"]).toBe(">=0.2.0-alpha.711 <0.3.0");
     expect(peers["react"]).toBe("^19.2.7");
     expect(peers["react-dom"]).toBe("^19.2.7");
-    expect(dependencies["@rizom/site"]).toBe("0.2.0-alpha.235");
+    expect(dependencies["@rizom/site"]).toBe("0.2.0-alpha.246");
     expect(JSON.stringify(manifest)).not.toContain("preact");
     expect(manifest["publishPeerDependencies"]).toBeUndefined();
     expect(manifest["publishExports"]).toBeUndefined();
@@ -51,6 +52,10 @@ describe("smoke canary site package", () => {
     // static package metadata without querying brain content.
     expect(section?.template).toBe("smoke-canary-site:home");
     expect(section?.content).toEqual(canaryStatus);
+  });
+
+  it("names its section template namespace:name, the only form a brain resolves", () => {
+    expect(routes[0]?.sections?.[0]?.template).toBe("smoke-canary-site:home");
   });
 
   it("ships a deterministic public canary marker", () => {
